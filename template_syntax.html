@@ -1,0 +1,159 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+
+    <span>Message: {{ msg }}</span>
+
+    <span id="onece" v-once>This will never change: {{ msg }}</span>
+    <div id="raw-html" v-html="rawHtml"></div>
+    <div id="bind" v-bind:id="dynamicId"></div>
+    <button id="bind-boolean" v-bind:disabled="someDynamicCondition">Button</button>
+    <p id="vif" v-if="seen">Now you see me</p>
+    <a id="href" v-bind:href="url">link</a>
+    <a id="vonclick" v-on:click="doSomething">click</a>
+    <form id="vonsubmit" v-on:submit.prevent="onSubmit">
+      <input type='submit' value='送信'>
+    </form>
+
+    <div id="filter">{{ message | capitalize }}</div>
+    <!-- in v-bind -->
+    <div id="filter-bind" v-bind:id="rawId | formatId">filter-bind</div>
+
+    <!-- 省略記法 -->
+    <a id="omission-href" :href="url">link</a>
+    <!-- 省略記法 -->
+    <a id="omission-method" @click="doSomething">click</a>
+
+    <script>
+    // テキスト
+    var span = new Vue({
+      el: "span",
+      data: {
+        msg: "Vue"
+      }
+    })
+
+    var onece = new Vue({
+      el: "#onece",
+      data: {
+        msg: "Onece!!!!"
+      }
+    })
+
+    // 生のHTML
+    var rawHtml = new Vue({
+      el: "#raw-html",
+      data: {
+        rawHtml: '<ol><li>hoge</li></ol>'
+      }
+    })
+
+    // 属性
+    var bind = new Vue({
+      el: "#bind",
+      data: {
+        dynamicId: "binded-id"
+      }
+    })
+
+    // 超使えそう！！！
+    var bindBoolean = new Vue({
+      el: "#bind-boolean",
+      data: {
+        someDynamicCondition: false
+      }
+    })
+
+    // ディレクティブ
+    var vif = new Vue({
+      el: '#vif',
+      data: {
+        seen: true
+      }
+    })
+
+    // 引数
+    var href = new Vue({
+      el: '#href',
+      data: {
+        url: "http://google.co.jp"
+      }
+    })
+
+    var vonclick = new Vue({
+      el: '#vonclick',
+      methods: {
+        doSomething: function () {
+          console.log('clickされたよ！')
+        }
+      }
+    })
+
+    // 修飾子
+    var vonsubmit = new Vue({
+      el: '#vonsubmit',
+      methods: {
+        onSubmit: function () {
+          if(window.confirm('本当にいいんですね？')){
+
+            location.href = "example_confirm.html"; // example_confirm.html へジャンプ
+
+          }
+        }
+      }
+    })
+
+    // フィルタ
+    var filter = new Vue({
+      el: '#filter',
+      data: {
+        message: 'hogehoge'
+      },
+      filters: {
+        capitalize: function (value) {
+          if (!value) return ''
+          value = value.toString()
+          return value.charAt(0).toUpperCase() + value.slice(1)
+        }
+      }
+    })
+
+    var filter = new Vue({
+      el: '#filter-bind',
+      data: {
+        rawId: 'hogeid'
+      },
+      filters: {
+        formatId: function (value) {
+          if (!value) return ''
+          value = value.toString()
+          return value.charAt(0).toUpperCase() + value.slice(1)
+        }
+      }
+    })
+
+    //省略記法
+    var omissionHref = new Vue({
+      el: '#omission-href',
+      data: {
+        url: 'http://google.co.jp'
+      }
+    })
+
+    var omissionMethod = new Vue({
+      el: '#omission-method',
+      methods: {
+        doSomething: function () {
+          if(window.confirm('本当にいいんですね？')){
+
+            location.href = "example_confirm.html"; // example_confirm.html へジャンプ
+          }
+        }
+      }
+    })
+
+    </script>
+  </body>
+</html>
