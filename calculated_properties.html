@@ -1,0 +1,153 @@
+<html>
+<head>
+</head>
+<body>
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <!-- ajax ライブラリの豊富なエコシステムや、汎用的なユーティリティ	-->
+  <!-- メソッドがたくさんあるので、Vue のコアはそれらを再発明せずに		-->
+  <!-- 小さく保たれています。この結果として、慣れ親しんでいるものだけを	-->
+  <!-- 使えるような自由さを Vue は持ち合わせています。			-->
+  <script src="https://unpkg.com/axios@0.12.0/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/lodash@4.13.1/lodash.min.js"></script>
+  <!-- 算出プロパティ -->
+  <div id="example">
+    <p>Original message: "{{ message }}"</p>
+    <p>Computed reversed message: "{{ reversedMessage }}"</p>
+  </div>
+  <div id="methods-ver">
+    <p>Reversed message: "{{ reverseMessage() }}"</p>
+    <p>{{ now }}</p>
+    <p>{{ now() }}</p>
+  </div>
+  <div id="monitoring">
+    <input v-model="firstName">
+    <p>{{ fullName }}</p>
+  </div>
+  <div id="setter">
+    <p>{{ fullName }}</p>
+  </div>
+
+  <div id="watch-example">
+    <p>
+      Ask a yes/no question:
+      <input v-model="question">
+    </p>
+    <p>{{ answer }}</p>
+    <img :src="src">
+  </div>
+
+  <script>
+  var vm1 = new Vue({
+    el: '#example',
+    data: {
+      message: 'Hello'
+    },
+    computed: {
+      // 算出 getter 関数
+      reversedMessage: function () {
+        // `this` は vm インスタンスを指します
+        return this.message.split('').reverse().join('')
+      }
+    }
+  })
+
+  // 算出プロパティvs メソッドプロパティ
+  var vm2 = new Vue({
+    el: '#methods-ver',
+    data: {
+      message: 'Hello'
+    },
+    computed: {
+      now: function () {
+        return Date.now()
+      }
+    },
+    methods: {
+      reverseMessage: function () {
+        return this.message.split('').reverse().join('')
+      },
+      now: function () {
+        return Date.now()
+      }
+    }
+  })
+
+  // 算出プロパティvs メソッドプロパティ
+  var vm3 = new Vue({
+    el: '#monitoring',
+    data: {
+      firstName: 'Foo',
+      lastName: 'Bar'
+    },
+    computed: {
+      fullName: function () {
+        return this.firstName + ' ' + this.lastName
+      }
+    }
+  })
+
+  var vm4 = new Vue({
+    el: '#setter',
+    computed: {
+      fullName: {
+        // getter 関数
+        get: function () {
+          return this.firstName + ' ' + this.lastName
+        },
+        // setter 関数
+        // TODO: 動いている気配がない
+        set: function (newValue) {
+          var names = newValue.split(' ')
+          this.firstName = names[0]
+          this.lastName = names[names.length - 1]
+        }
+      }
+    }
+  })
+
+  var watchExampleVM = new Vue({
+    el: '#watch-example',
+    data: {
+      question: '',
+      src: '',
+      answer: 'I cannot give you an answer until you ask a question!'
+    },
+    watch: {
+      // この関数は question が変わるごとに実行されます。
+      question: function (newQuestion) {
+        this.answer = 'Waiting for you to stop typing...'
+        this.getAnswer()
+      }
+    },
+    methods: {
+      // _.debounce は特にコストの高い処理の実行を制御するための
+      // lodash の関数です。この場合は、どのくらい頻繁に yesno.wtf/api
+      // へのアクセスすべきかを制限するために、ユーザーの入力が完全に
+      // 終わるのを待ってから ajax リクエストを実行しています。
+      // _.debounce (とその親戚である _.throttle )  についての詳細は
+      // https://lodash.com/docs#debounce を見てください。
+      getAnswer: _.debounce(
+        function () {
+          if (this.question.indexOf('?') === -1) {
+            this.answer = 'Questions usually contain a question mark. ;-)'
+            return
+          }
+          this.answer = 'Thinking...'
+          var vm = this
+          axios.get('https://yesno.wtf/api')
+          .then(function (response) {
+            vm.answer = _.capitalize(response.data.answer)
+            vm.src = _.capitalize(response.data.image)
+          })
+          .catch(function (error) {
+            vm.answer = 'Error! Could not reach the API. ' + error
+          })
+        },
+        // ユーザーの入力が終わるのを待つ時間をミリ秒で指定します。
+        500
+      )
+    }
+  })
+  </script>
+</body>
+</html>
